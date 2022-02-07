@@ -1,0 +1,34 @@
+{
+  "name": "mongoose-find-by-reference",
+  "author": "CheezOne",
+  "homepage": "https://github.com/cheezone/mongoose-find-by-reference",
+  "version": "1.0.0",
+  "description": "Make Mongoose support finding in reference fields.",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "build": "tsc --declaration",
+    "release": "tsc --declaration && npm publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cheezone/mongoose-find-by-reference.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cheezone/mongoose-find-by-reference/issues"
+  },
+  "keywords": [
+    "mongoose",
+    "reference",
+    "ref",
+    "objectid",
+    "mongodb"
+  ],
+  "license": "Apache 2.0",
+  "devDependencies": {
+    "typescript": "^4.5.5"
+  },
+  "peerDependencies": {
+    "mongoose": "6.x"
+  }
+}
