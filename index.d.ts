@@ -1,2 +1,5 @@
 import { Schema } from 'mongoose';
-export declare function MongooseFindByReference(schema: Schema): void;
+
+declare function MongooseFindByReference(schema: Schema): void;
+
+export { MongooseFindByReference };
