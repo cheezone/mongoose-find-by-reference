@@ -4,11 +4,11 @@
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/cheezone/mongoose-find-by-reference/issues)
 [![Downloads](https://img.shields.io/npm/dm/mongoose-find-by-reference.svg)](https://img.shields.io/npm/dm/mongoose-find-by-reference.svg)
 
-English | [简体中文](README.zh_CN.md)
+[English](README.md) |  简体中文
 
-This is a Mongoose plugin that allows your Mongoose to support lookup on reference fields.
+这是一个可以让你的 Mongoose 支持在参考字段上执行 Find 的插件。
 
-Reference field is like this:
+参考字段，也就是类似这样的字段：
 
 ```typescript
 {
@@ -17,18 +17,17 @@ Reference field is like this:
   }
 ```
 
-Its principle is to parse your find request. When it finds that you want to filter the value of the reference field, it will read the model corresponding to the reference field and perform the search, obtain the id array that matches the filter, and then put the reference field The filter of the value is replaced by the judgment of whether the value of the reference field is in the id array.
+它的原理是解析你的 Find 请求，当发现你在访问参考字段的属性的时候，它就会读取参考字段对应的 Model 并进行 Find，将对参考字段值的筛选替换成符合条件的 ObjectId 数组。
 
-# install
+# 安装
 
 ```bash
 npm i -S mongoose-find-by-reference
 ```
 
-# usage
+# 使用
 
-The `mongoose-find-by-reference` module exposes a single function that you can
-pass to [Mongoose schema's `plugin()` function](https://mongoosejs.com/docs/api.html#schema_Schema-plugin).
+`mongoose-find-by-reference` 会导出一个适用于 [Mongoose Schema 的 `plugin()` ](https://mongoosejs.com/docs/api.html#schema_Schema-plugin) 的函数。
 
 ```javascript
 const { MongooseFindByReference } = require('mongoose-find-by-reference');
@@ -38,7 +37,7 @@ const schema = new mongoose.Schema({
 schema.plugin(MongooseFindByReference);
 ```
 
-Then, you can use it like this.
+接着，你可以这么用：
 
 ```typescript
 const result = await catModel
@@ -53,13 +52,13 @@ const result = await catModel
   .exec();
 ```
 
-Its conditions will be automatically replaced with:
+搜索条件就会被替换成：
 
 ```typescript
 const newConditions = {
   $and: {
     parents: {
-      $in: [/* ObjectIDs for Eligible Cats */],
+      $in: [/* 符合条件的猫的 ObjectId 数组 */],
     },
     sex: 0,
   },
