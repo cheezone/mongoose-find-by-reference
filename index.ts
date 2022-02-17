@@ -14,16 +14,29 @@ export function MongooseFindByReference(schema: Schema) {
                 '访问到的 Model 数量为 0 或者不存在。\n The number of models accessed is 0 or does not exist.',
             );
 
-        function getRefModel(obj: any): Model<any> | undefined {
-            return (
-                (obj?.instance === 'ObjectID' &&
-                    obj.options?.ref?.length &&
-                    Object.keys(models).includes(obj.options.ref) &&
-                    models[obj.options.ref]) ||
-                (obj?.$embeddedSchemaType && getRefModel(obj.$embeddedSchemaType)) ||
-                undefined
-            );
+        const getRefModel = (obj: any): Model<any> | undefined | {
+            refPath
+            : string
+        } => {
+            let refKey = ''
+            if (obj)
+                if (obj.instance === 'ObjectID') {
+                    if (obj.options?.ref?.length)
+                        refKey = obj.options.ref
+                    else if (obj.options?.refPath?.length)
+                        if (schema.path(obj.options.refPath))
+                            return { refPath: obj.options.refPath }
+                }
+                else if (obj?.$embeddedSchemaType) {
+                    return getRefModel(obj.$embeddedSchemaType)
+                }
+            if (refKey)
+                return Object.keys(models).includes(refKey) &&
+                    models[refKey] || undefined
+
         }
+
+
 
 
         const schema: Schema = this.model.schema;
@@ -64,17 +77,22 @@ export function MongooseFindByReference(schema: Schema) {
                     if (currentPathsValue === undefined) {
                         const currentModel = getRefModel(prevPathsValue);
                         if (currentModel) {
-                            const subCoditions = await loopUpdateCoditions(
-                                [],
-                                value,
-                                currentModel.schema,
-                            );
-                            if (subCoditions) {
-                                const ids = (
-                                    await currentModel.find({ [paths]: subCoditions }, '_id')
-                                ).map((v) => v._id);
+                            if ('refPath' in currentModel) {
+                                console.error(`Can't do it with 'refPath' because we can't read it in Query.`)
+                                return undefined
+                            } else {
+                                const subCoditions = await loopUpdateCoditions(
+                                    [],
+                                    value,
+                                    currentModel.schema,
+                                );
+                                if (subCoditions) {
+                                    const ids = (
+                                        await currentModel.find({ [paths]: subCoditions }, '_id')
+                                    ).map((v) => v._id);
 
-                                return { $in: ids };
+                                    return { $in: ids };
+                                }
                             }
                         }
                     }
