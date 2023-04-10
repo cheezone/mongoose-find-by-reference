@@ -1,4 +1,4 @@
-import { Schema, Model, SchemaType } from "mongoose";
+import { Schema, Model, SchemaType, isValidObjectId } from "mongoose";
 
 const messages: Record<string, any> = {
   schemaTypeError: {
@@ -174,7 +174,8 @@ export function MongooseFindByReference(schema: Schema) {
         else if (
           typeof value === "object" &&
           value !== null &&
-          Object.keys(value).length > 0
+          Object.keys(value).length > 0 &&
+          !isValidObjectId(value)
         )
           Object.assign(result, {
             [paths]: Object.fromEntries(
