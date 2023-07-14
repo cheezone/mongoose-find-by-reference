@@ -101,7 +101,7 @@ export function MongooseFindByReference(schema: Schema) {
 
     type Dict = { [key: string]: any };
     function flatten(dd: Dict, separator: string = '.', prefix: string = ''): Dict {
-      // transofrms nested subcondition to dot notation
+      // transform nested object to dot notation
       `
         { person: { name: "John" } } to { "person.name": "John" }
       `
