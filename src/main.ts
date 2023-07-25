@@ -29,7 +29,7 @@ export function MongooseFindByReference(schema: Schema) {
     throw new Error(i18n("schemaTypeError"));
 
   // 对 Schema 挂上钩子
-  schema.pre(["find", "findOne"], async function (next) {
+  schema.pre(["find", "findOne", "distinct"], async function (next) {
     /** 当前的 Model 们 */
     const models = this.model.db.models;
 
