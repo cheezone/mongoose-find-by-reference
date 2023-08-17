@@ -1,5 +1,9 @@
 import { Schema, Model, SchemaType, isValidObjectId } from "mongoose";
 
+/**
+ * 错误信息对象，包含中文和英文两种语言的错误信息
+ * Error messages object, containing error messages in both Chinese and English
+ */
 const messages: Record<string, any> = {
   schemaTypeError: {
     "zh-CN": '参数 "schema" 的类型得是 "Schema"。',
@@ -12,7 +16,10 @@ const messages: Record<string, any> = {
 };
 
 /**
- * 翻译//函数
+ * 翻译函数，根据环境变量 LANG 的值返回对应语言的错误信息
+ * Translation function, returns error messages in the language corresponding to the value of the LANG environment variable
+ * @param messageId - 错误信息的 ID
+ * @param messageId - ID of the error message
  */
 function i18n(messageId: string) {
   if (messageId in messages) {
@@ -23,21 +30,32 @@ function i18n(messageId: string) {
   }
 }
 
+/**
+ * MongooseFindByReference 函数，用于在 Mongoose 中通过引用查找数据
+ * MongooseFindByReference function, used to find data by reference in Mongoose
+ * @param schema - Mongoose 的 Schema 对象
+ * @param schema - The Schema object of Mongoose
+ */
 export function MongooseFindByReference(schema: Schema) {
   // 假设得到的不是 Schema 则报错
+  // Throw an error if the received is not a Schema
   if (schema.constructor.name !== "Schema")
     throw new Error(i18n("schemaTypeError"));
 
   // 对 Schema 挂上钩子
+  // Hook on the Schema
   schema.pre(["find", "findOne", "distinct"], async function (next) {
-    /** 当前的 Model 们 */
+    /** 当前的 Model 们
+     *  Current Models */
     const models = this.model.db.models;
 
     // 对  Models 进行判空
+    // Check Models for emptiness
     if (Object.keys(models ?? {}).length === 0)
       throw new Error(i18n("modelCountError"));
 
-    /** 当前的 Schema */
+    /** 当前的 Schema
+     *  Current Schema */
     const schema: Schema = this.model.schema;
 
     /**
@@ -50,21 +68,28 @@ export function MongooseFindByReference(schema: Schema) {
       let refKey = "";
       if (obj?.instance === "ObjectID") {
         // 假设是 Ref Path 就直接读取
+        // If it is Ref Path, read it directly
         const options = obj.options;
         if (options?.ref?.length) refKey = options.ref;
         // else if (options?.refPath?.length)
         //   if (schema.path(options.refPath)) return { refPath: options.refPath };
       } else if ((obj as any)?.$embeddedSchemaType) {
         // 假设是数组就读取子项 Type
+        // If it is an array, read the subitem Type
         return getModel((obj as any).$embeddedSchemaType);
       }
       return models[refKey];
     }
 
     /**
-     *
-     * @param paths
-     *
+     * 将路径数组转换为引用路径数组
+     * Transforms a path array into a reference path array
+     * @param paths - 要转换的路径数组
+     * @param paths - The path array to be transformed
+     * @param tSchema - 当前的 Mongoose Schema 对象，默认为主 Schema
+     * @param tSchema - The current Mongoose Schema object, default is the main Schema
+     * @returns 转换后的引用路径数组
+     * @returns The transformed reference path array
      * @exmples ['owner','name','en-US']  => ['owner', 'name.en-US']
      */
     function transPath2RefPath(
@@ -72,16 +97,25 @@ export function MongooseFindByReference(schema: Schema) {
       tSchema: Schema = schema
     ): string[] {
       let previousPath: string[] = [];
+
+      // 如果还有路径没有转换完
+      // If there are still paths that have not been converted
       while (paths.length > 0) {
         const path = paths.shift() ?? "";
+
+        // 如果 Schema 里面有这个路径
+        // If the Schema has this path
         if (tSchema.path([...previousPath, path].join("."))) {
           previousPath.push(path);
         } else {
           const currentModel = getModel(tSchema.path(previousPath.join(".")));
           if (currentModel) {
-            const recurseResult = transPath2RefPath([path, ...paths], currentModel.schema)
+            const recurseResult = transPath2RefPath(
+              [path, ...paths],
+              currentModel.schema
+            );
             if (!paths.length) {
-              return [ previousPath.join("."), ...recurseResult ];
+              return [previousPath.join("."), ...recurseResult];
             } else {
               previousPath.push(...recurseResult);
             }
@@ -100,22 +134,29 @@ export function MongooseFindByReference(schema: Schema) {
     }`;
 
     type Dict = { [key: string]: any };
-    function flatten(dd: Dict, separator: string = '.', prefix: string = ''): Dict {
+    function flatten(
+      dd: Dict,
+      separator: string = ".",
+      prefix: string = ""
+    ): Dict {
       // transform nested object to dot notation
       `
         { person: { name: "John" } } to { "person.name": "John" }
-      `
+      `;
       let result: Dict = {};
 
       for (let [k, v] of Object.entries(dd)) {
-          let key = prefix ? `${prefix}${separator}${k}` : k;
+        let key = prefix ? `${prefix}${separator}${k}` : k;
 
-          if (v.constructor === Object && !Object.keys(v).some( checkKey => checkKey.startsWith('$'))) {
-              let flatObject = flatten(v as Dict, separator, key);
-              result = { ...result, ...flatObject };
-          } else {
-              result[key] = v;
-          }
+        if (
+          v.constructor === Object &&
+          !Object.keys(v).some((checkKey) => checkKey.startsWith("$"))
+        ) {
+          let flatObject = flatten(v as Dict, separator, key);
+          result = { ...result, ...flatObject };
+        } else {
+          result[key] = v;
+        }
       }
 
       return result;
@@ -127,6 +168,7 @@ export function MongooseFindByReference(schema: Schema) {
       cSchema = schema
     ): Promise<any> {
       // 如果 Conditions 不能进行分析就直接返回它
+      // If Conditions cannot be analyzed, return it directly
       if (
         typeof conditions !== "object" ||
         conditions === null ||
@@ -136,15 +178,18 @@ export function MongooseFindByReference(schema: Schema) {
       }
 
       /** 最终结果 */
+      /** Final result */
       const result: Record<string, any> = {};
 
       // 获取前一个 Path 的值
+      // Get the value of the previous Path
       const prevPathsValue = cSchema.path(prevPaths.join("."));
 
       for (let [paths, value] of Object.entries(conditions)) {
         // paths 1 = 'owner.name.en'; value 1 = 'Dean'
 
         // 判断 Paths 存在于 Schema 上
+        // Determine whether Paths exists on Schema
         if (schema.path(paths)) {
         } else {
           const reduceResult = [
@@ -159,6 +204,7 @@ export function MongooseFindByReference(schema: Schema) {
         }
 
         // 当前的 Paths 数组
+        // Current Paths array
         const currentPathsArray = paths.startsWith("$")
           ? paths === "$"
             ? prevPaths
@@ -166,9 +212,11 @@ export function MongooseFindByReference(schema: Schema) {
           : [...prevPaths, paths];
 
         // 当前的 Paths
+        // Current Paths
         const currentPathsString = currentPathsArray.join(".");
 
         // 当前的 Paths 对应的值
+        // The value corresponding to the current Paths
         const currentPathsValue = cSchema.path(currentPathsString);
 
         if (!paths.startsWith("$"))
@@ -178,7 +226,10 @@ export function MongooseFindByReference(schema: Schema) {
               const subCoditions = await lookup([], value, currentModel.schema);
               if (subCoditions) {
                 const ids = (
-                  await currentModel.find(flatten({[paths]: subCoditions}), "_id")
+                  await currentModel.find(
+                    flatten({ [paths]: subCoditions }),
+                    "_id"
+                  )
                 ).map((v) => v._id);
 
                 return { $in: ids };
