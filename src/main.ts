@@ -29,7 +29,7 @@ export function MongooseFindByReference(schema: Schema) {
     throw new Error(i18n("schemaTypeError"));
 
   // 对 Schema 挂上钩子
-  schema.pre(["find", "findOne"], async function (next) {
+  schema.pre(["find", "findOne", "distinct"], async function (next) {
     /** 当前的 Model 们 */
     const models = this.model.db.models;
 
@@ -79,12 +79,13 @@ export function MongooseFindByReference(schema: Schema) {
         } else {
           const currentModel = getModel(tSchema.path(previousPath.join(".")));
           if (currentModel) {
-            const result = [
-              previousPath.join("."),
-              ...transPath2RefPath([path, ...paths], currentModel.schema),
-            ];
-            return result;
-          } else return [path];
+            const recurseResult = transPath2RefPath([path, ...paths], currentModel.schema)
+            if (!paths.length) {
+              return [ previousPath.join("."), ...recurseResult ];
+            } else {
+              previousPath.push(...recurseResult);
+            }
+          } else return [...previousPath, path];
         }
       }
       return previousPath;
@@ -97,6 +98,28 @@ export function MongooseFindByReference(schema: Schema) {
         },
         $or:[]
     }`;
+
+    type Dict = { [key: string]: any };
+    function flatten(dd: Dict, separator: string = '.', prefix: string = ''): Dict {
+      // transform nested object to dot notation
+      `
+        { person: { name: "John" } } to { "person.name": "John" }
+      `
+      let result: Dict = {};
+
+      for (let [k, v] of Object.entries(dd)) {
+          let key = prefix ? `${prefix}${separator}${k}` : k;
+
+          if (v.constructor === Object && !Object.keys(v).some( checkKey => checkKey.startsWith('$'))) {
+              let flatObject = flatten(v as Dict, separator, key);
+              result = { ...result, ...flatObject };
+          } else {
+              result[key] = v;
+          }
+      }
+
+      return result;
+    }
 
     async function lookup(
       prevPaths: string[],
@@ -155,7 +178,7 @@ export function MongooseFindByReference(schema: Schema) {
               const subCoditions = await lookup([], value, currentModel.schema);
               if (subCoditions) {
                 const ids = (
-                  await currentModel.find({ [paths]: subCoditions }, "_id")
+                  await currentModel.find(flatten({[paths]: subCoditions}), "_id")
                 ).map((v) => v._id);
 
                 return { $in: ids };
