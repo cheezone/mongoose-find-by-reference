@@ -35,7 +35,7 @@
     "eslint": "^8.47.0",
     "ts-node": "^10.9.1",
     "tsup": "^8.0.0",
-    "typescript": "<5.3"
+    "typescript": "<5.4"
   },
   "dependencies": {
     "mocha": "^10.2.0"
