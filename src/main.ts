@@ -66,7 +66,7 @@ export function MongooseFindByReference(schema: Schema) {
      */
     function getModel(obj: SchemaType): Model<any> | undefined {
       let refKey = "";
-      if (obj?.instance === "ObjectID") {
+      if (obj?.instance === "ObjectID" || obj?.instance === "ObjectId") {
         // 假设是 Ref Path 就直接读取
         // If it is Ref Path, read it directly
         const options = obj.options;
