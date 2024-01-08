@@ -70,9 +70,9 @@ export function MongooseFindByReference(schema: Schema) {
         // 假设是 Ref Path 就直接读取
         // If it is Ref Path, read it directly
         const options = obj.options;
-        if (options?.ref?.length) refKey = options.ref;
-        // else if (options?.refPath?.length)
-        //   if (schema.path(options.refPath)) return { refPath: options.refPath };
+        if (options?.ref?.length) {
+          refKey = options.ref;
+        }
       } else if ((obj as any)?.$embeddedSchemaType) {
         // 假设是数组就读取子项 Type
         // If it is an array, read the subitem Type
@@ -125,7 +125,9 @@ export function MongooseFindByReference(schema: Schema) {
       return previousPath;
     }
 
-    `{
+    `
+    Example:
+    {
         $and:{
             'owner.name':'Dean',
             'infos.timestamp.createdAt':Date,
