@@ -4,7 +4,7 @@
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/cheezone/mongoose-find-by-reference/issues)
 [![Downloads](https://img.shields.io/npm/dm/mongoose-find-by-reference.svg)](https://img.shields.io/npm/dm/mongoose-find-by-reference.svg)
 
-[English](README.md) |  简体中文
+[English](README.md) | 简体中文
 
 这是一个可以让你的 Mongoose 支持在参考字段上执行 Find 的插件。
 
@@ -30,7 +30,7 @@ npm i -S mongoose-find-by-reference
 `mongoose-find-by-reference` 会导出一个适用于 [Mongoose Schema 的 `plugin()` ](https://mongoosejs.com/docs/api.html#schema_Schema-plugin) 的函数。
 
 ```javascript
-const { MongooseFindByReference } = require('mongoose-find-by-reference');
+const { MongooseFindByReference } = require("mongoose-find-by-reference");
 const schema = new mongoose.Schema({
   /* ... */
 });
@@ -44,7 +44,7 @@ const result = await catModel
   .find({
     $and: {
       parents: {
-        'owner.name': 'Dean',
+        "owner.name": "Dean",
       },
       sex: 0,
     },
@@ -58,9 +58,15 @@ const result = await catModel
 const newConditions = {
   $and: {
     parents: {
-      $in: [/* 符合条件的猫的 ObjectId 数组 */],
+      $in: [
+        /* 符合条件的猫的 ObjectId 数组 */
+      ],
     },
     sex: 0,
   },
 };
 ```
+
+# 贡献
+
+本项目缺少测试方面的代码，欢迎提交 PR。

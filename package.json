@@ -2,7 +2,7 @@
   "name": "mongoose-find-by-reference",
   "author": "CheezOne",
   "homepage": "https://github.com/cheezone/mongoose-find-by-reference",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Make Mongoose support finding in reference fields.",
   "main": "dist/main.js",
   "module": "dist/main.mjs",

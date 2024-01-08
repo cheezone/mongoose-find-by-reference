@@ -60,7 +60,7 @@ export function MongooseFindByReference(schema: Schema) {
 
     /**
      * 返回 Ref Path 关联的 Model。
-     * Return the Model which conntected with Ref Path.
+     * Return the Model which connected with Ref Path.
      * @param obj
      * @returns
      */
@@ -90,7 +90,7 @@ export function MongooseFindByReference(schema: Schema) {
      * @param tSchema - The current Mongoose Schema object, default is the main Schema
      * @returns 转换后的引用路径数组
      * @returns The transformed reference path array
-     * @exmples ['owner','name','en-US']  => ['owner', 'name.en-US']
+     * @examples ['owner','name','en-US']  => ['owner', 'name.en-US']
      */
     function transPath2RefPath(
       paths: string[],
@@ -177,12 +177,13 @@ export function MongooseFindByReference(schema: Schema) {
         return conditions;
       }
 
-      /** 最终结果 */
-      /** Final result */
+      /** 最终结果 - Final result */
       const result: Record<string, any> = {};
 
-      // 获取前一个 Path 的值
-      // Get the value of the previous Path
+      /**
+       * 获取前一个 Path 的值
+       * Get the value of the previous Path
+       */
       const prevPathsValue = cSchema.path(prevPaths.join("."));
 
       for (let [paths, value] of Object.entries(conditions)) {
@@ -223,11 +224,15 @@ export function MongooseFindByReference(schema: Schema) {
           if (currentPathsValue === undefined) {
             const currentModel = getModel(prevPathsValue);
             if (currentModel) {
-              const subCoditions = await lookup([], value, currentModel.schema);
-              if (subCoditions) {
+              const subConditions = await lookup(
+                [],
+                value,
+                currentModel.schema
+              );
+              if (subConditions) {
                 const ids = (
                   await currentModel.find(
-                    flatten({ [paths]: subCoditions }),
+                    flatten({ [paths]: subConditions }),
                     "_id"
                   )
                 ).map((v) => v._id);

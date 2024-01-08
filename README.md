@@ -31,7 +31,7 @@ The `mongoose-find-by-reference` module exposes a single function that you can
 pass to [Mongoose schema's `plugin()` function](https://mongoosejs.com/docs/api.html#schema_Schema-plugin).
 
 ```javascript
-const { MongooseFindByReference } = require('mongoose-find-by-reference');
+const { MongooseFindByReference } = require("mongoose-find-by-reference");
 const schema = new mongoose.Schema({
   /* ... */
 });
@@ -45,7 +45,7 @@ const result = await catModel
   .find({
     $and: {
       parents: {
-        'owner.name': 'Dean',
+        "owner.name": "Dean",
       },
       sex: 0,
     },
@@ -59,9 +59,15 @@ Its conditions will be automatically replaced with:
 const newConditions = {
   $and: {
     parents: {
-      $in: [/* ObjectIDs for Eligible Cats */],
+      $in: [
+        /* ObjectIDs for Eligible Cats */
+      ],
     },
     sex: 0,
   },
 };
 ```
+
+# need help
+
+Now this project needs everyone's help, and there is currently a lack of testing.
