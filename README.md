@@ -71,3 +71,13 @@ const newConditions = {
 # need help
 
 Now this project needs everyone's help, and there is currently a lack of testing.
+
+Thanks to:
+
+<a href="https://github.com/cheezone/mongoose-find-by-reference/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=cheezone/mongoose-find-by-reference" />
+</a>
+ 
+
+Thanks you so much for your contribution! 🎉 I appreciate your time and effort in submitting the pull request. Your changes are valuable, and we're grateful for your commitment to improving our project. If you have any further suggestions or if there's anything else you'd like to contribute, please feel free to let me know. Thanks again! 🙌
+ 
